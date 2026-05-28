@@ -43,9 +43,23 @@
         </p>
 
         <div class="hero-buttons">
-          <button class="primary-btn">Fazer Quiz</button>
+          <button
+            class="primary-btn"
+            onclick="
+              document
+                .getElementById('quiz')
+                .scrollIntoView({ behavior: 'smooth' })
+            "
+          >
+            Fazer Quiz
+          </button>
 
-          <button class="secondary-btn">Explorar Espécies</button>
+          <button
+            class="secondary-btn"
+            onclick="window.location.href = 'wiki.html'"
+          >
+            Explorar Espécies
+          </button>
         </div>
       </div>
     </section>
@@ -89,22 +103,35 @@
     <section id="quiz" class="quiz-section">
       <div class="section-title">
         <span>QUIZ</span>
-
         <h2>Descubra Qual Ave Combina com Você</h2>
       </div>
 
       <div class="quiz-box">
-        <h3>Quanto tempo livre você possui diariamente?</h3>
+        <!-- Barra de progresso -->
+        <div class="quiz-progress">
+          <div class="quiz-progress-bar" id="progressBar"></div>
+        </div>
+        <p class="quiz-step-label" id="stepLabel">Pergunta 1 de 5</p>
 
-        <div class="quiz-options">
-          <button>Muito tempo</button>
+        <!-- Pergunta -->
+        <div class="quiz-question" id="quizQuestion"></div>
 
-          <button>Tempo moderado</button>
+        <!-- Opções -->
+        <div class="quiz-options" id="quizOptions"></div>
 
-          <button>Pouco tempo</button>
+        <!-- Resultado -->
+        <div class="quiz-result" id="quizResult" style="display: none">
+          <div class="result-icon" id="resultIcon"></div>
+          <h3 id="resultTitle"></h3>
+          <p id="resultDesc"></p>
+          <button class="quiz-restart-btn" onclick="restartQuiz()">
+            Refazer Quiz
+          </button>
         </div>
       </div>
     </section>
+
+    <script src="quiz.js" defer></script>
 
     <section class="legal-section">
       <div class="legal-content">
