@@ -1,0 +1,47 @@
+<!--
+  Arquivo: WebContent/WEB-INF/web.xml
+  
+  Descrição:
+  Arquivo de configuração da aplicação Java Web
+  Define servlets, mapeamentos de URL, filtros e outros componentes
+-->
+
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+         http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+    
+    <!-- Informações da aplicação -->
+    <display-name>POB_AP6 - Portal de Orientação sobre Aves</display-name>
+    <description>Aplicação Web para orientação e domesticação responsável de aves</description>
+    
+    <!-- Configuração do Servlet principal (Front Controller) -->
+    <servlet>
+        <servlet-name>AppServlet</servlet-name>
+        <servlet-class>controllers.AppServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    
+    <!-- Mapeamento da URL para o Servlet -->
+    <servlet-mapping>
+        <servlet-name>AppServlet</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Configuração da página de boas-vindas -->
+    <welcome-file-list>
+        <welcome-file>pages/index.jsp</welcome-file>
+    </welcome-file-list>
+    
+    <!-- Timeout de sessão em minutos -->
+    <session-config>
+        <cookie-config>
+            <secure>false</secure>
+            <http-only>true</http-only>
+        </cookie-config>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+    
+</web-app>

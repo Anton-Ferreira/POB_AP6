@@ -6,18 +6,15 @@ const botaoPesquisa = document.querySelector(".search-box button");
 // LISTA DE ESPÉCIES
 // =========================
 
+const contextPath = window.APP_CONTEXT_PATH || "";
+
 const especies = {
-  calopsita: "calopsita.html",
-
-  canario: "canario.html",
-
-  agapornis: "agapornis.html",
-
-  periquito: "periquito.html",
-
-  cacatua: "cacatua.html",
-
-  papagaio: "papagaio.html",
+  calopsita: contextPath + "/calopsita",
+  canario: contextPath + "/wiki",
+  agapornis: contextPath + "/wiki",
+  periquito: contextPath + "/wiki",
+  cacatua: contextPath + "/wiki",
+  papagaio: contextPath + "/wiki",
 };
 
 // =========================
