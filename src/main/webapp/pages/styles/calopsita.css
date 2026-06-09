@@ -1,0 +1,209 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --cafe-noir: #4c3d19;
+  --kombu-green: #354024;
+  --moss-green: #889063;
+  --tan: #cfbb99;
+  --bone: #e5d7c4;
+  --light-box: #f4eadc;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: var(--bone);
+  color: #2c2c2c;
+}
+
+.top-header {
+  width: 100%;
+  background-color: var(--kombu-green);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 18px 6%;
+
+  border-bottom: 4px solid var(--moss-green);
+}
+
+.logo {
+  font-size: 2rem;
+  color: var(--bone);
+  font-family: "Cormorant Garamond", serif;
+  font-weight: bold;
+}
+
+nav {
+  display: flex;
+  gap: 30px;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--bone);
+  transition: 0.3s;
+}
+
+nav a:hover {
+  color: var(--tan);
+}
+
+.page-layout {
+  max-width: 1400px;
+  margin: 50px auto;
+
+  display: grid;
+  grid-template-columns: 2.5fr 1fr;
+
+  gap: 40px;
+
+  padding: 0 6%;
+}
+
+.article-content {
+  background-color: var(--light-box);
+  padding: 50px;
+
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.article-content h1 {
+  font-size: 5rem;
+  margin-bottom: 20px;
+
+  color: var(--cafe-noir);
+  font-family: "Cormorant Garamond", serif;
+}
+
+.intro {
+  font-size: 1.1rem;
+  line-height: 1.9;
+
+  margin-bottom: 50px;
+}
+
+.content-section {
+  margin-bottom: 50px;
+}
+
+.content-section h2 {
+  font-size: 2.3rem;
+  margin-bottom: 20px;
+
+  color: var(--kombu-green);
+  font-family: "Cormorant Garamond", serif;
+
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+  padding-bottom: 10px;
+}
+
+.content-section p {
+  line-height: 2;
+}
+
+.content-section ul {
+  margin-left: 25px;
+  line-height: 2;
+}
+
+.infobox {
+  background-color: #efe1cf;
+
+  height: fit-content;
+
+  border: 1px solid rgba(0, 0, 0, 0.08);
+
+  padding: 25px;
+}
+
+.infobox h3 {
+  text-align: center;
+
+  font-size: 2rem;
+
+  margin-bottom: 20px;
+
+  color: var(--cafe-noir);
+
+  font-family: "Cormorant Garamond", serif;
+}
+
+.infobox img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+
+  margin-bottom: 25px;
+}
+
+.info-item {
+  margin-bottom: 20px;
+
+  padding-bottom: 15px;
+
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.info-item span {
+  display: block;
+
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+
+  margin-bottom: 8px;
+
+  color: var(--moss-green);
+
+  text-transform: uppercase;
+}
+
+.info-item p {
+  color: var(--kombu-green);
+}
+
+footer {
+  margin-top: 50px;
+
+  background-color: var(--kombu-green);
+
+  padding: 25px;
+
+  text-align: center;
+}
+
+footer p {
+  color: var(--bone);
+}
+
+@media (max-width: 1000px) {
+  .page-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .top-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .article-content {
+    padding: 30px;
+  }
+
+  .article-content h1 {
+    font-size: 3.5rem;
+  }
+}

@@ -1,0 +1,296 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --cafe-noir: #4c3d19;
+  --kombu-green: #354024;
+  --moss-green: #889063;
+  --tan: #cfbb99;
+  --bone: #e5d7c4;
+  --light-box: #f5ede2;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: var(--bone);
+  color: #2b2b2b;
+}
+
+.top-header {
+  width: 100%;
+  padding: 18px 5%;
+  background-color: var(--kombu-green);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  border-bottom: 4px solid var(--moss-green);
+}
+
+.logo {
+  font-size: 2rem;
+  font-family: "Cormorant Garamond", serif;
+  color: var(--bone);
+  font-weight: bold;
+}
+
+.menu {
+  display: flex;
+  gap: 35px;
+}
+
+.menu a {
+  text-decoration: none;
+  color: var(--bone);
+  font-size: 0.95rem;
+  transition: 0.3s;
+}
+
+.menu a:hover {
+  color: var(--tan);
+}
+
+.search-box {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 35px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  outline: none;
+  border-radius: 4px;
+  font-family: "Poppins", sans-serif;
+}
+
+.search-box button {
+  padding: 12px 18px;
+  border: none;
+  cursor: pointer;
+  background-color: var(--moss-green);
+  color: white;
+  transition: 0.3s;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.search-box button:hover {
+  background-color: var(--cafe-noir);
+}
+
+.wiki-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  background-color: #d8c7ad;
+  padding: 40px 25px;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h3 {
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  color: var(--cafe-noir);
+}
+
+.sidebar ul {
+  list-style: none;
+  margin-bottom: 40px;
+}
+
+.sidebar ul li {
+  margin-bottom: 12px;
+}
+
+.sidebar ul li a {
+  text-decoration: none;
+  color: var(--kombu-green);
+  transition: 0.3s;
+}
+
+.sidebar ul li a:hover {
+  color: var(--cafe-noir);
+}
+
+.wiki-content {
+  flex: 1;
+  padding: 50px;
+}
+
+.welcome-box {
+  background-color: var(--light-box);
+  padding: 45px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  margin-bottom: 40px;
+}
+
+.welcome-box h1 {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+  color: var(--cafe-noir);
+  font-family: "Cormorant Garamond", serif;
+}
+
+.welcome-box p {
+  line-height: 1.8;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.featured-article,
+.wiki-info {
+  background-color: var(--light-box);
+  padding: 30px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.featured-article h2,
+.wiki-info h2,
+.species-section h2 {
+  margin-bottom: 25px;
+  font-size: 2rem;
+  color: var(--cafe-noir);
+  font-family: "Cormorant Garamond", serif;
+}
+
+.article-box {
+  display: flex;
+  gap: 25px;
+}
+
+.article-box img {
+  width: 250px;
+  height: 200px;
+  object-fit: cover;
+}
+
+.article-box h3 {
+  font-size: 2rem;
+  margin-bottom: 15px;
+  color: var(--kombu-green);
+  font-family: "Cormorant Garamond", serif;
+}
+
+.article-box p {
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.article-box a {
+  text-decoration: none;
+  color: var(--moss-green);
+  font-weight: bold;
+}
+
+.wiki-info p {
+  line-height: 1.9;
+}
+
+.species-section {
+  background-color: var(--light-box);
+  padding: 35px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.species-table {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.species-item {
+  display: flex;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.species-item img {
+  width: 140px;
+  height: 100px;
+  object-fit: cover;
+}
+
+.species-item h3 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  color: var(--kombu-green);
+  font-family: "Cormorant Garamond", serif;
+}
+
+.species-item p {
+  line-height: 1.7;
+}
+
+footer {
+  background-color: var(--kombu-green);
+  padding: 25px;
+  text-align: center;
+}
+
+footer p {
+  color: var(--bone);
+}
+
+@media (max-width: 1000px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .article-box {
+    flex-direction: column;
+  }
+
+  .article-box img {
+    width: 100%;
+  }
+}
+
+@media (max-width: 850px) {
+  .wiki-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  .top-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .menu {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .welcome-box h1 {
+    font-size: 2.5rem;
+  }
+
+  .species-item {
+    flex-direction: column;
+  }
+
+  .species-item img {
+    width: 100%;
+    height: 200px;
+  }
+}
