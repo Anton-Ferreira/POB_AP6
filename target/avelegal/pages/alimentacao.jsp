@@ -23,36 +23,15 @@
     <header>
       <nav>
         <div class="logo">Aves Legalizadas</div>
-        <div class="menu">
-          <a href="${pageContext.request.contextPath}/">Início</a>
-          <a href="${pageContext.request.contextPath}/#quiz">Quiz</a>
-          <a href="${pageContext.request.contextPath}/especies">Espécies</a>
-          <a href="${pageContext.request.contextPath}/mapa">Mapa</a>
-        </div>
+        <%@ include file="includes/nav-site.jsp" %>
       </nav>
     </header>
 
     <main class="wiki-layout">
       <aside class="sidebar">
-        <div class="search-box">
-          <input type="text" placeholder="Pesquisar espécie..." />
-          <button>Buscar</button>
-        </div>
+        <%@ include file="includes/pesquisa-especie.jsp" %>
 
-        <h3>Navegação</h3>
-        <ul>
-          <li><a href="${pageContext.request.contextPath}/wiki">Página Principal</a></li>
-          <li><a href="${pageContext.request.contextPath}/especies">Espécies</a></li>
-          <li><a href="${pageContext.request.contextPath}/cuidados">Cuidados</a></li>
-          <li><a href="${pageContext.request.contextPath}/alimentacao">Alimentação</a></li>
-          <li><a href="${pageContext.request.contextPath}/legalizacao">Legalização</a></li>
-        </ul>
-
-        <h3>Categorias</h3>
-        <ul>
-          <li><a href="#">Aves Pequenas</a></li>
-          <li><a href="#">Aves Médias</a></li>
-        </ul>
+        <%@ include file="includes/nav-wiki.jsp" %>
       </aside>
 
       <div class="page-layout care-layout">
@@ -196,5 +175,8 @@
     <footer>
       <p>© 2026 - Plataforma de Apoio à Posse Responsável de Aves</p>
     </footer>
+
+    <script>window.APP_CONTEXT_PATH = '${pageContext.request.contextPath}';</script>
+    <script src="${pageContext.request.contextPath}/pages/scripts/pesquisa.js"></script>
   </body>
 </html>

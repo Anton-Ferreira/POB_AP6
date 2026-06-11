@@ -1,11 +1,15 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="models.Ave" %>
+<%
+  Ave ave = (Ave) request.getAttribute("ave");
+%>
 <!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Calopsita - Wiki das Aves</title>
+    <title><%= ave != null ? ave.getNomePopular() + " - Wiki das Aves" : "Espécie - Wiki das Aves" %></title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -24,140 +28,119 @@
       <nav>
         <div class="logo">Aves Legalizadas</div>
 
-        <div class="menu">
-          <a href="${pageContext.request.contextPath}/">Início</a>
-          <a href="${pageContext.request.contextPath}/#quiz">Quiz</a>
-          <a href="${pageContext.request.contextPath}/wiki">Espécies</a>
-          <a href="${pageContext.request.contextPath}/mapa">Mapa</a>
-        </div>
+        <%@ include file="includes/nav-site.jsp" %>
       </nav>
     </header>
 
     <main class="wiki-layout">
       <aside class="sidebar">
-        <div class="search-box">
-          <input type="text" placeholder="Pesquisar espécie..." />
-          <button>Buscar</button>
-        </div>
+        <%@ include file="includes/pesquisa-especie.jsp" %>
 
-        <h3>Navegação</h3>
-
-        <ul>
-          <li><a href="${pageContext.request.contextPath}/wiki">Página Principal</a></li>
-          <li><a href="${pageContext.request.contextPath}/especies">Espécies</a></li>
-          <li><a href="${pageContext.request.contextPath}/cuidados">Cuidados</a></li>
-          <li><a href="${pageContext.request.contextPath}/alimentacao">Alimentação</a></li>
-          <li><a href="${pageContext.request.contextPath}/legalizacao">Legalização</a></li>
-        </ul>
-
-        <h3>Categorias</h3>
-
-        <ul>
-          <li><a href="#">Aves Pequenas</a></li>
-          <li><a href="#">Aves Médias</a></li>
-        </ul>
+        <%@ include file="includes/nav-wiki.jsp" %>
       </aside>
 
+      <% if (ave != null) { %>
       <div class="page-layout">
         <section class="article-content">
-          <h1>Calopsita</h1>
+          <h1><%= ave.getNomePopular() %></h1>
 
-          <p class="intro">
-            A <strong>calopsita</strong> é uma ave doméstica extremamente
-            popular entre iniciantes devido ao seu comportamento sociável,
-            inteligência e facilidade de adaptação.
-          </p>
+          <p class="intro"><%= ave.getTextoOuPadrao(ave.getResumoBreve()) %></p>
 
           <section class="content-section">
-            <h2>Características</h2>
-            <p>
-              As calopsitas possuem porte médio, topete característico e
-              comportamento bastante comunicativo. São aves inteligentes que
-              podem aprender sons, assobios e pequenas interações com o tutor.
-            </p>
-          </section>
-
-          <section class="content-section">
-            <h2>Comportamento</h2>
-            <p>
-              É uma espécie extremamente sociável e que necessita de interação
-              frequente. Quando criadas sozinhas, podem desenvolver forte
-              vínculo com os tutores.
-            </p>
-          </section>
-
-          <section class="content-section">
-            <h2>Alimentação</h2>
-            <p>
-              A alimentação deve incluir ração específica, sementes balanceadas,
-              frutas e vegetais permitidos. Uma dieta adequada é essencial para
-              evitar doenças.
-            </p>
+            <h2>Características físicas</h2>
+            <p><%= ave.getTextoOuPadrao(ave.getCaracteristicasFisicas()) %></p>
           </section>
 
           <section class="content-section">
             <h2>Legalização</h2>
-            <p>
-              A aquisição deve ser realizada apenas através de criadouros
-              legalizados e aves devidamente anilhadas, respeitando as normas
-              ambientais vigentes.
-            </p>
+            <p><%= ave.getTextoOuPadrao(ave.getLegislacaoInfo()) %></p>
           </section>
 
           <section class="content-section">
             <h2>Curiosidades</h2>
-            <ul>
-              <li>Podem viver mais de 20 anos.</li>
-              <li>Reconhecem vozes e rotinas.</li>
-              <li>Algumas aprendem melodias simples.</li>
-              <li>São consideradas ótimas aves para iniciantes.</li>
-            </ul>
+            <p><%= ave.getTextoOuPadrao(ave.getCuriosidades()) %></p>
+          </section>
+
+          <section class="content-section">
+            <h2>Comportamento</h2>
+            <p><%= ave.getTextoOuPadrao(ave.getComportamentoTemperamento()) %></p>
+          </section>
+
+          <section class="content-section">
+            <h2>Alimentação</h2>
+            <p><%= ave.getTextoOuPadrao(ave.getGuiaAlimentacao()) %></p>
+          </section>
+
+          <section class="content-section">
+            <h2>Alimentos proibidos</h2>
+            <p><%= ave.getTextoOuPadrao(ave.getAlimentosProibidos()) %></p>
+          </section>
+
+          <section class="content-section">
+            <h2>Requisitos para gaiola</h2>
+            <p><%= ave.getTextoOuPadrao(ave.getRequisitosGaiola()) %></p>
+          </section>
+
+          <section class="content-section">
+            <h2>Sinais de alerta</h2>
+            <p><%= ave.getTextoOuPadrao(ave.getSinaisAlertaSaude()) %></p>
+          </section>
+
+          <section class="content-section">
+            <h2>Enriquecimento ambiental</h2>
+            <p><%= ave.getTextoOuPadrao(ave.getEnriquecimentoAmbiental()) %></p>
           </section>
         </section>
 
         <aside class="infobox">
-          <h3>Calopsita</h3>
+          <h3><%= ave.getNomePopular() %></h3>
 
-          <img
-            src="https://images.unsplash.com/photo-1522858547137-f1dcec554f55?q=80&w=1200&auto=format&fit=crop"
-            alt="Calopsita"
-          />
+          <img src="<%= ave.getImagemExibicao() %>" alt="<%= ave.getNomePopular() %>" />
 
           <div class="info-item">
             <span>Nome científico</span>
-            <p>Nymphicus hollandicus</p>
+            <p><%= ave.getTextoOuPadrao(ave.getNomeCientifico()) %></p>
           </div>
 
           <div class="info-item">
             <span>Expectativa de vida</span>
-            <p>15 a 20 anos</p>
+            <p><%= ave.getTextoOuPadrao(ave.getExpectativaVida()) %></p>
           </div>
 
           <div class="info-item">
             <span>Porte</span>
-            <p>Médio</p>
+            <p><%= ave.getPorte() %></p>
           </div>
 
           <div class="info-item">
             <span>Nível de ruído</span>
-            <p>Médio</p>
+            <p><%= ave.getNivelRuidoExibicao() %></p>
           </div>
 
           <div class="info-item">
             <span>Dificuldade</span>
-            <p>Fácil</p>
+            <p><%= ave.getDificuldadeExibicao() %></p>
           </div>
 
           <div class="info-item">
             <span>Ideal para</span>
-            <p>Iniciantes</p>
+            <p><%= ave.getIdealPara() %></p>
+          </div>
+
+          <div class="info-item">
+            <span>Status da legalização</span>
+            <p><%= ave.getStatusLegalFormatado() %></p>
           </div>
         </aside>
       </div>
+      <% } %>
     </main>
 
     <footer>
       <p>© 2026 - Plataforma de Apoio à Posse Responsável de Aves</p>
     </footer>
+
+    <script>window.APP_CONTEXT_PATH = '${pageContext.request.contextPath}';</script>
+    <script src="${pageContext.request.contextPath}/pages/scripts/pesquisa.js"></script>
   </body>
 </html>

@@ -1,53 +1,99 @@
-const inputPesquisa = document.querySelector(".search-box input");
+const formPesquisa = document.getElementById("form-pesquisa-especie");
 
-const botaoPesquisa = document.querySelector(".search-box button");
+function obterAreaPrincipal() {
+  return (
+    document.querySelector(".wiki-content") ||
+    document.querySelector(".article-content") ||
+    document.querySelector(".page-layout") ||
+    document.querySelector("main")
+  );
+}
 
-// =========================
-// LISTA DE ESPÉCIES
-// =========================
-
-const contextPath = window.APP_CONTEXT_PATH || "";
-
-const especies = {
-  calopsita: contextPath + "/calopsita",
-  canario: contextPath + "/wiki",
-  agapornis: contextPath + "/wiki",
-  periquito: contextPath + "/wiki",
-  cacatua: contextPath + "/wiki",
-  papagaio: contextPath + "/wiki",
-};
-
-// =========================
-// PESQUISAR
-// =========================
-
-function pesquisarEspecie() {
-  let valor = inputPesquisa.value
-    .toLowerCase()
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-
-  // remove espaços extras
-  valor = valor.replace(/\s+/g, " ");
-
-  if (especies[valor]) {
-    window.location.href = especies[valor];
-  } else {
-    alert("Espécie não encontrada.");
+function ocultarErroPesquisa() {
+  const panel = document.getElementById("pesquisa-erro");
+  if (panel) {
+    panel.hidden = true;
   }
 }
 
-// =========================
-// EVENTOS
-// =========================
+function mostrarErroPesquisa() {
+  let panel = document.getElementById("pesquisa-erro");
+  const areaPrincipal = obterAreaPrincipal();
 
-// Clique no botão
-botaoPesquisa.addEventListener("click", pesquisarEspecie);
-
-// Enter no teclado
-inputPesquisa.addEventListener("keydown", function (event) {
-  if (event.key === "Enter") {
-    pesquisarEspecie();
+  if (!areaPrincipal) {
+    return;
   }
-});
+
+  if (!panel) {
+    panel = document.createElement("div");
+    panel.id = "pesquisa-erro";
+    panel.className = "pesquisa-erro";
+    panel.setAttribute("role", "alert");
+    areaPrincipal.insertBefore(panel, areaPrincipal.firstChild);
+  } else if (panel.parentElement !== areaPrincipal) {
+    areaPrincipal.insertBefore(panel, areaPrincipal.firstChild);
+  }
+
+  panel.textContent = "Espécie não encontrada.";
+  panel.hidden = false;
+}
+
+function limparParametroErroPesquisa() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has("pesquisaErro")) {
+    return;
+  }
+
+  url.searchParams.delete("pesquisaErro");
+  history.replaceState({}, "", url.pathname + url.search + url.hash);
+}
+
+if (formPesquisa) {
+  const inputPesquisa = formPesquisa.querySelector("input[name='termo']");
+  const contextPath = window.APP_CONTEXT_PATH || "";
+
+  async function pesquisarEspecie(event) {
+    event.preventDefault();
+
+    const termo = inputPesquisa.value.trim();
+    if (!termo) {
+      return;
+    }
+
+    ocultarErroPesquisa();
+
+    try {
+      const url =
+        contextPath +
+        "/pesquisar?termo=" +
+        encodeURIComponent(termo);
+
+      const response = await fetch(url, {
+        headers: { Accept: "application/json" },
+      });
+
+      if (!response.ok) {
+        mostrarErroPesquisa();
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.found && data.url) {
+        window.location.href = data.url;
+      } else {
+        mostrarErroPesquisa();
+      }
+    } catch (error) {
+      formPesquisa.submit();
+    }
+  }
+
+  formPesquisa.addEventListener("submit", pesquisarEspecie);
+  inputPesquisa.addEventListener("input", ocultarErroPesquisa);
+
+  if (new URLSearchParams(window.location.search).get("pesquisaErro") === "1") {
+    mostrarErroPesquisa();
+    limparParametroErroPesquisa();
+  }
+}

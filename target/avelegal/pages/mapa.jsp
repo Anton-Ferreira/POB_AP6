@@ -25,12 +25,7 @@
       <nav>
         <div class="logo">Aves Legalizadas</div>
 
-        <div class="menu">
-          <a href="${pageContext.request.contextPath}/">Início</a>
-          <a href="${pageContext.request.contextPath}/#quiz">Quiz</a>
-          <a href="${pageContext.request.contextPath}/wiki">Espécies</a>
-          <a href="${pageContext.request.contextPath}/mapa">Mapa</a>
-        </div>
+        <%@ include file="includes/nav-site.jsp" %>
       </nav>
     </header>
 
@@ -96,58 +91,12 @@
 
         <div class="results">
           <div class="results-header">
-            <h2>Locais encontrados <span id="count-label">(3)</span></h2>
+            <h2>Locais encontrados <span id="count-label">(0)</span></h2>
             <a href="#" id="ver-todos">Ver todos</a>
           </div>
 
           <div class="cards" id="cards-container">
-            <div class="card" data-categoria="criadouro">
-              <img
-                src="https://images.unsplash.com/photo-1522926193341-e9ffd686c60f?q=80&w=400"
-                alt="Criadouro Bem-Te-Vi"
-              />
-              <div class="card-content">
-                <span class="tag">Criadouro Autorizado</span>
-                <h3>Criadouro Bem-Te-Vi</h3>
-                <p>Rua dos Pássaros, 123</p>
-                <div class="card-footer">
-                  <span>★ 4.8</span>
-                  <span>1,2 km</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="card" data-categoria="petshop">
-              <img
-                src="https://images.unsplash.com/photo-1544923408-75c5cef46f14?q=80&w=400"
-                alt="Pet Shop Aves e Cia"
-              />
-              <div class="card-content">
-                <span class="tag brown-tag">Pet Shop Especializado</span>
-                <h3>Pet Shop Aves &amp; Cia</h3>
-                <p>Av. Paulista, 2001</p>
-                <div class="card-footer">
-                  <span>★ 4.6</span>
-                  <span>1,8 km</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="card" data-categoria="parque">
-              <img
-                src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=400"
-                alt="Parque Ibirapuera"
-              />
-              <div class="card-content">
-                <span class="tag">Parque</span>
-                <h3>Parque Ibirapuera</h3>
-                <p>Av. Pedro Álvares Cabral</p>
-                <div class="card-footer">
-                  <span>★ 4.9</span>
-                  <span>2,3 km</span>
-                </div>
-              </div>
-            </div>
+            <p class="cards-loading" id="cards-loading">Buscando locais próximos...</p>
           </div>
         </div>
       </section>
@@ -159,10 +108,26 @@
 
     <script src="${pageContext.request.contextPath}/pages/scripts/map.js"></script>
 
+    <%
+      String googleMapsApiKey = (String) request.getAttribute("googleMapsApiKey");
+      boolean mapaDisponivel = googleMapsApiKey != null && !googleMapsApiKey.isBlank();
+    %>
+    <% if (mapaDisponivel) { %>
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBS7Dl9PjDrdM5Df_nauM6qnxqR9Mbziks&callback=initMap&loading=async&libraries=places,marker"
+      src="https://maps.googleapis.com/maps/api/js?key=<%= googleMapsApiKey %>&callback=initMap&loading=async&libraries=places,marker"
       async
       defer
     ></script>
+    <% } else { %>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const mapEl = document.getElementById("map");
+        if (mapEl) {
+          mapEl.innerHTML =
+            "<p class=\"map-config-error\">O mapa não está disponível. Configure a variável GOOGLE_MAPS_API_KEY no servidor.</p>";
+        }
+      });
+    </script>
+    <% } %>
   </body>
 </html>

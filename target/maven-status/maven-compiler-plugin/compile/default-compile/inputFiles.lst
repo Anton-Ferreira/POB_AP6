@@ -1,4 +1,6 @@
-c:\Users\mcrfs\Documents\trabalhoPhilps\aveLegal\avelegal\src\main\java\controllers\AppServlet.java
-c:\Users\mcrfs\Documents\trabalhoPhilps\aveLegal\avelegal\src\main\java\models\Ave.java
-c:\Users\mcrfs\Documents\trabalhoPhilps\aveLegal\avelegal\src\main\java\models\dao\AveDAO.java
-c:\Users\mcrfs\Documents\trabalhoPhilps\aveLegal\avelegal\src\main\java\utils\ConnectionDB.java
+C:\Users\phili\Documents\poa\POB_AP6\src\main\java\controllers\AppServlet.java
+C:\Users\phili\Documents\poa\POB_AP6\src\main\java\models\Ave.java
+C:\Users\phili\Documents\poa\POB_AP6\src\main\java\models\AveQuizPerfil.java
+C:\Users\phili\Documents\poa\POB_AP6\src\main\java\models\dao\AveDAO.java
+C:\Users\phili\Documents\poa\POB_AP6\src\main\java\utils\GoogleMapsConfig.java
+C:\Users\phili\Documents\poa\POB_AP6\src\main\java\utils\SupabaseClient.java

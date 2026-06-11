@@ -50,10 +50,18 @@ nav {
   color: var(--bone);
   font-size: 0.95rem;
   transition: 0.3s;
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
 }
 
 .menu a:hover {
   color: var(--tan);
+}
+
+.menu a.active {
+  color: var(--tan);
+  font-weight: 600;
+  border-bottom-color: var(--tan);
 }
 
 .hero {
@@ -368,6 +376,18 @@ footer p {
   margin-bottom: 15px;
 }
 
+.result-image-wrap {
+  margin-bottom: 20px;
+}
+
+.result-image-wrap img {
+  width: 180px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid rgba(229, 215, 196, 0.35);
+}
+
 .quiz-result h3 {
   font-family: "Cormorant Garamond", serif;
   font-size: 2.4rem;
@@ -392,6 +412,26 @@ footer p {
   transition: 0.3s;
   border-radius: 3px;
   font-family: "Poppins", sans-serif;
+}
+
+.quiz-article-btn {
+  display: inline-block;
+  padding: 14px 32px;
+  margin-bottom: 18px;
+  background-color: var(--bone);
+  border: 1px solid var(--bone);
+  color: var(--kombu-green);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: 0.3s;
+  border-radius: 3px;
+  font-family: "Poppins", sans-serif;
+}
+
+.quiz-article-btn:hover {
+  background-color: transparent;
+  color: var(--bone);
 }
 
 .quiz-restart-btn:hover {

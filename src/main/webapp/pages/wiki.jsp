@@ -1,4 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.List" %>
+<%@ page import="models.Ave" %>
+<%
+  Ave especieDestaque = (Ave) request.getAttribute("especieDestaque");
+  String erroWiki = (String) request.getAttribute("erroWiki");
+
+  @SuppressWarnings("unchecked")
+  List<Ave> especiesPopulares = (List<Ave>) request.getAttribute("especiesPopulares");
+%>
 <!doctype html>
 <html lang="pt-BR">
   <head>
@@ -24,38 +33,15 @@
       <nav>
         <div class="logo">Aves Legalizadas</div>
 
-        <div class="menu">
-          <a href="${pageContext.request.contextPath}/">Início</a>
-          <a href="${pageContext.request.contextPath}/#quiz">Quiz</a>
-          <a href="${pageContext.request.contextPath}/wiki">Espécies</a>
-          <a href="${pageContext.request.contextPath}/mapa">Mapa</a>
-        </div>
+        <%@ include file="includes/nav-site.jsp" %>
       </nav>
     </header>
 
     <main class="wiki-layout">
       <aside class="sidebar">
-        <div class="search-box">
-          <input type="text" placeholder="Pesquisar espécie..." />
-          <button>Buscar</button>
-        </div>
+        <%@ include file="includes/pesquisa-especie.jsp" %>
 
-        <h3>Navegação</h3>
-
-        <ul>
-          <li><a href="${pageContext.request.contextPath}/wiki">Página Principal</a></li>
-          <li><a href="${pageContext.request.contextPath}/especies">Espécies</a></li>
-          <li><a href="${pageContext.request.contextPath}/cuidados">Cuidados</a></li>
-          <li><a href="${pageContext.request.contextPath}/alimentacao">Alimentação</a></li>
-          <li><a href="${pageContext.request.contextPath}/legalizacao">Legalização</a></li>
-        </ul>
-
-        <h3>Categorias</h3>
-
-        <ul>
-          <li><a href="#">Aves Pequenas</a></li>
-          <li><a href="#">Aves Médias</a></li>
-        </ul>
+        <%@ include file="includes/nav-wiki.jsp" %>
       </aside>
 
       <section class="wiki-content">
@@ -67,24 +53,40 @@
           </p>
         </div>
 
+        <%
+          if (erroWiki != null && !erroWiki.isBlank()) {
+        %>
+        <p class="wiki-error"><%= erroWiki %></p>
+        <%
+          }
+        %>
+
         <div class="content-grid">
           <article class="featured-article">
             <h2>Espécie em Destaque</h2>
+            <%
+              if (especieDestaque != null) {
+            %>
             <div class="article-box">
               <img
-                src="https://images.unsplash.com/photo-1522858547137-f1dcec554f55?q=80&w=1200&auto=format&fit=crop"
-                alt="Calopsita"
+                src="<%= especieDestaque.getImagemExibicao() %>"
+                alt="<%= especieDestaque.getNomePopular() %>"
               />
               <div>
-                <h3>Calopsita</h3>
-                <p>
-                  A calopsita é uma das aves domésticas mais populares entre
-                  iniciantes por seu comportamento sociável, inteligência e
-                  facilidade de adaptação.
-                </p>
-                <a href="${pageContext.request.contextPath}/calopsita">Ler artigo completo</a>
+                <h3><%= especieDestaque.getNomePopular() %></h3>
+                <p><%= especieDestaque.getTextoOuPadrao(especieDestaque.getResumoBreve()) %></p>
+                <a href="<%= request.getContextPath() + especieDestaque.getArtigoPath() %>"
+                  >Ler artigo completo</a
+                >
               </div>
             </div>
+            <%
+              } else {
+            %>
+            <p>Nenhuma espécie disponível para destaque no momento.</p>
+            <%
+              }
+            %>
           </article>
 
           <div class="wiki-info">
@@ -100,38 +102,28 @@
         <section class="species-section">
           <h2>Espécies Populares</h2>
           <div class="species-table">
-            <div class="species-item">
-              <img
-                src="https://images.unsplash.com/photo-1522858547137-f1dcec554f55?q=80&w=1200&auto=format&fit=crop"
-                alt="Calopsita"
-              />
+            <%
+              if (especiesPopulares != null && !especiesPopulares.isEmpty()) {
+                for (Ave ave : especiesPopulares) {
+            %>
+            <a
+              href="<%= request.getContextPath() + ave.getArtigoPath() %>"
+              class="species-item"
+            >
+              <img src="<%= ave.getImagemExibicao() %>" alt="<%= ave.getNomePopular() %>" />
               <div>
-                <h3>Calopsita</h3>
-                <p>Ave sociável e indicada para iniciantes.</p>
+                <h3><%= ave.getNomePopular() %></h3>
+                <p><%= ave.getTextoOuPadrao(ave.getResumoBreve()) %></p>
               </div>
-            </div>
-
-            <div class="species-item">
-              <img
-                src="https://images.unsplash.com/photo-1452570053594-1b985d6ea890?q=80&w=1200&auto=format&fit=crop"
-                alt="Canário"
-              />
-              <div>
-                <h3>Canário</h3>
-                <p>Conhecido pelo canto e cuidado simples.</p>
-              </div>
-            </div>
-
-            <div class="species-item">
-              <img
-                src="https://images.unsplash.com/photo-1444464666168-49d633b86797?q=80&w=1200&auto=format&fit=crop"
-                alt="Agapornis"
-              />
-              <div>
-                <h3>Agapornis</h3>
-                <p>Espécie extremamente interativa e afetiva.</p>
-              </div>
-            </div>
+            </a>
+            <%
+                }
+              } else {
+            %>
+            <p>Nenhuma espécie popular cadastrada no momento.</p>
+            <%
+              }
+            %>
           </div>
         </section>
       </section>
@@ -140,5 +132,8 @@
     <footer>
       <p>© 2026 - Plataforma de Apoio à Posse Responsável de Aves</p>
     </footer>
+
+    <script>window.APP_CONTEXT_PATH = '${pageContext.request.contextPath}';</script>
+    <script src="${pageContext.request.contextPath}/pages/scripts/pesquisa.js"></script>
   </body>
 </html>

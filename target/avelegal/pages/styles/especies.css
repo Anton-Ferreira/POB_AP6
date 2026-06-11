@@ -8,6 +8,14 @@
   margin-top: 15px;
 }
 
+.species-error {
+  color: #8b2e2e;
+  background-color: #f8e8e8;
+  border: 1px solid rgba(139, 46, 46, 0.2);
+  padding: 14px 18px;
+  margin-bottom: 24px;
+}
+
 .species-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

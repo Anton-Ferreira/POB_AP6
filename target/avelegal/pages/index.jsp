@@ -23,12 +23,7 @@
       <nav>
         <div class="logo">Aves Legalizadas</div>
 
-        <div class="menu">
-          <a href="${pageContext.request.contextPath}/">Início</a>
-          <a href="#quiz">Quiz</a>
-          <a href="${pageContext.request.contextPath}/wiki">Espécies</a>
-          <a href="${pageContext.request.contextPath}/mapa">Mapa</a>
-        </div>
+        <%@ include file="includes/nav-site.jsp" %>
       </nav>
     </header>
 
@@ -118,9 +113,15 @@
         <div class="quiz-options" id="quizOptions"></div>
 
         <div class="quiz-result" id="quizResult" style="display: none">
+          <div class="result-image-wrap" id="resultImageWrap" style="display: none">
+            <img id="resultImage" alt="" />
+          </div>
           <div class="result-icon" id="resultIcon"></div>
           <h3 id="resultTitle"></h3>
           <p id="resultDesc"></p>
+          <a id="resultLink" class="quiz-article-btn" href="#" style="display: none"
+            >Ver artigo completo</a
+          >
           <button class="quiz-restart-btn" onclick="restartQuiz()">
             Refazer Quiz
           </button>
@@ -128,6 +129,14 @@
       </div>
     </section>
 
+    <%
+      String avesQuizJson = (String) request.getAttribute("avesQuizJson");
+      if (avesQuizJson == null) {
+        avesQuizJson = "[]";
+      }
+    %>
+    <script>window.APP_CONTEXT_PATH = "${pageContext.request.contextPath}";</script>
+    <script>window.AVES_QUIZ = <%= avesQuizJson %>;</script>
     <script src="${pageContext.request.contextPath}/pages/scripts/Quiz.js" defer></script>
 
     <section class="legal-section">

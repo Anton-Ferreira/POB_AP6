@@ -1,195 +1,127 @@
-/*
- * Arquivo: src/models/dao/AveDAO.java
- * 
- * Descrição:
- * Data Access Object para a entidade Ave
- * Encapsula toda a lógica de acesso aos dados de aves no banco de dados
- * 
- * Padrão de Projeto: Data Access Object (DAO)
- */
-
 package models.dao;
 
 import models.Ave;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.sql.*;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
-/**
- * DAO para manipular dados de Aves no banco de dados
- * Fornece métodos CRUD (Create, Read, Update, Delete)
- */
+import utils.SupabaseClient;
+
 public class AveDAO {
-    
-    // Você pode estender ou conectar com a classe ConnectionDB aqui
-    private Connection connection;
-    
-    public AveDAO(Connection connection) {
-        this.connection = connection;
+
+    private static final List<String> TERMOS_ESPECIES_POPULARES = List.of(
+            "Calopsita",
+            "Canário",
+            "Periquito-australiano"
+    );
+
+    public List<Ave> buscarTodas() throws Exception {
+        return SupabaseClient.listarAves();
     }
-    
-    /**
-     * Busca todas as aves do banco de dados
-     */
-    public List<Ave> buscarTodas() {
-        List<Ave> aves = new ArrayList<>();
-        String sql = "SELECT * FROM aves";
-        
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            
-            while (rs.next()) {
-                Ave ave = mapearResultadoParaAve(rs);
-                aves.add(ave);
+
+    public Optional<Ave> buscarPorSlug(String slug) throws Exception {
+        return SupabaseClient.buscarPorSlug(slug);
+    }
+
+    public Optional<Ave> buscarPorNome(String termo) throws Exception {
+        if (termo == null || termo.isBlank()) {
+            return Optional.empty();
+        }
+
+        String termoNorm = Ave.normalizarParaBusca(termo);
+        String termoCompacto = compactar(termoNorm);
+        List<Ave> aves = buscarTodas();
+        List<Ave> candidatos = new ArrayList<>();
+
+        for (Ave ave : aves) {
+            String nomeNorm = Ave.normalizarParaBusca(ave.getNomePopular());
+            String nomeCompacto = compactar(nomeNorm);
+            String slugCompacto = compactar(ave.getSlug());
+
+            if (termoNorm.equals(nomeNorm) || termoCompacto.equals(slugCompacto)) {
+                return Optional.of(ave);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return aves;
-    }
-    
-    /**
-     * Busca uma ave específica pelo ID
-     */
-    public Ave buscarPorId(int id) {
-        String sql = "SELECT * FROM aves WHERE id = ?";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                return mapearResultadoParaAve(rs);
+
+            if (nomeNorm.contains(termoNorm) || slugCompacto.contains(termoCompacto)) {
+                candidatos.add(ave);
+                continue;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return null;
-    }
-    
-    /**
-     * Busca aves por características como domesticabilidade
-     */
-    public List<Ave> buscarPorDomesticabilidade(boolean domesticavel) {
-        List<Ave> aves = new ArrayList<>();
-        String sql = "SELECT * FROM aves WHERE domesticavel = ?";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setBoolean(1, domesticavel);
-            ResultSet rs = pstmt.executeQuery();
-            
-            while (rs.next()) {
-                Ave ave = mapearResultadoParaAve(rs);
-                aves.add(ave);
+
+            for (String parte : dividirNome(nomeNorm)) {
+                if (parte.equals(termoNorm) || parte.startsWith(termoNorm)) {
+                    candidatos.add(ave);
+                    break;
+                }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        
-        return aves;
-    }
-    
-    /**
-     * Insere uma nova ave no banco de dados
-     */
-    public boolean inserir(Ave ave) {
-        String sql = "INSERT INTO aves (nome_comum, nome_cientifico, descricao, " +
-                     "habitat, alimentacao, expectativa_vida, tamanho, temperamento, " +
-                     "domesticavel, informacoes_legais, cuidados_especiais, imagem_url) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, ave.getNomeComum());
-            pstmt.setString(2, ave.getNomeCientifico());
-            pstmt.setString(3, ave.getDescricao());
-            pstmt.setString(4, ave.getHabitat());
-            pstmt.setString(5, ave.getAlimentacao());
-            pstmt.setString(6, ave.getExpectativaVida());
-            pstmt.setString(7, ave.getTamanho());
-            pstmt.setString(8, ave.getTemperamento());
-            pstmt.setBoolean(9, ave.isDomesticavel());
-            pstmt.setString(10, ave.getInformacoesLegais());
-            pstmt.setString(11, ave.getCuidadosEspeciais());
-            pstmt.setString(12, ave.getImagemUrl());
-            
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+        if (candidatos.isEmpty()) {
+            return Optional.empty();
         }
-        
-        return false;
-    }
-    
-    /**
-     * Atualiza os dados de uma ave existente
-     */
-    public boolean atualizar(Ave ave) {
-        String sql = "UPDATE aves SET nome_comum = ?, nome_cientifico = ?, " +
-                     "descricao = ?, habitat = ?, alimentacao = ?, " +
-                     "expectativa_vida = ?, tamanho = ?, temperamento = ?, " +
-                     "domesticavel = ?, informacoes_legais = ?, " +
-                     "cuidados_especiais = ?, imagem_url = ? WHERE id = ?";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, ave.getNomeComum());
-            pstmt.setString(2, ave.getNomeCientifico());
-            pstmt.setString(3, ave.getDescricao());
-            pstmt.setString(4, ave.getHabitat());
-            pstmt.setString(5, ave.getAlimentacao());
-            pstmt.setString(6, ave.getExpectativaVida());
-            pstmt.setString(7, ave.getTamanho());
-            pstmt.setString(8, ave.getTemperamento());
-            pstmt.setBoolean(9, ave.isDomesticavel());
-            pstmt.setString(10, ave.getInformacoesLegais());
-            pstmt.setString(11, ave.getCuidadosEspeciais());
-            pstmt.setString(12, ave.getImagemUrl());
-            pstmt.setInt(13, ave.getId());
-            
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+        if (candidatos.size() == 1) {
+            return Optional.of(candidatos.get(0));
         }
-        
-        return false;
-    }
-    
-    /**
-     * Deleta uma ave do banco de dados
-     */
-    public boolean deletar(int id) {
-        String sql = "DELETE FROM aves WHERE id = ?";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+        List<Ave> palavraExata = new ArrayList<>();
+        for (Ave ave : candidatos) {
+            for (String parte : dividirNome(Ave.normalizarParaBusca(ave.getNomePopular()))) {
+                if (parte.equals(termoNorm)) {
+                    palavraExata.add(ave);
+                    break;
+                }
+            }
         }
-        
-        return false;
+
+        if (palavraExata.size() == 1) {
+            return Optional.of(palavraExata.get(0));
+        }
+
+        if (palavraExata.size() > 1) {
+            return Optional.empty();
+        }
+
+        List<Ave> inicioNome = new ArrayList<>();
+        for (Ave ave : candidatos) {
+            if (Ave.normalizarParaBusca(ave.getNomePopular()).startsWith(termoNorm)) {
+                inicioNome.add(ave);
+            }
+        }
+
+        if (inicioNome.size() == 1) {
+            return Optional.of(inicioNome.get(0));
+        }
+
+        return Optional.empty();
     }
-    
-    /**
-     * Mapeia uma linha do ResultSet para um objeto Ave
-     */
-    private Ave mapearResultadoParaAve(ResultSet rs) throws SQLException {
-        Ave ave = new Ave();
-        ave.setId(rs.getInt("id"));
-        ave.setNomeComum(rs.getString("nome_comum"));
-        ave.setNomeCientifico(rs.getString("nome_cientifico"));
-        ave.setDescricao(rs.getString("descricao"));
-        ave.setHabitat(rs.getString("habitat"));
-        ave.setAlimentacao(rs.getString("alimentacao"));
-        ave.setExpectativaVida(rs.getString("expectativa_vida"));
-        ave.setTamanho(rs.getString("tamanho"));
-        ave.setTemperamento(rs.getString("temperamento"));
-        ave.setDomesticavel(rs.getBoolean("domesticavel"));
-        ave.setInformacoesLegais(rs.getString("informacoes_legais"));
-        ave.setCuidadosEspeciais(rs.getString("cuidados_especiais"));
-        ave.setImagemUrl(rs.getString("imagem_url"));
-        
-        return ave;
+
+    public Optional<Ave> buscarAleatoria() throws Exception {
+        List<Ave> aves = buscarTodas();
+        if (aves.isEmpty()) {
+            return Optional.empty();
+        }
+
+        int index = ThreadLocalRandom.current().nextInt(aves.size());
+        return Optional.of(aves.get(index));
+    }
+
+    public List<Ave> buscarPopulares() throws Exception {
+        List<Ave> populares = new ArrayList<>();
+
+        for (String termo : TERMOS_ESPECIES_POPULARES) {
+            buscarPorNome(termo).ifPresent(populares::add);
+        }
+
+        return populares;
+    }
+
+    private static String compactar(String valor) {
+        return valor.replace(" ", "").replace("-", "").replace("/", "");
+    }
+
+    private static String[] dividirNome(String nomeNorm) {
+        return nomeNorm.split("[\\s/\\-]+");
     }
 }

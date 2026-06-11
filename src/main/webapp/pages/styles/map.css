@@ -298,6 +298,12 @@ body {
   overflow-x: auto;
 }
 
+.cards-loading {
+  padding: 20px;
+  color: #888;
+  font-size: 14px;
+}
+
 .card {
   min-width: 320px;
   background: white;
@@ -329,6 +335,11 @@ body {
   height: 130px;
   object-fit: cover;
   border-radius: 18px;
+  flex-shrink: 0;
+}
+
+.card-sem-imagem {
+  padding: 18px 20px;
 }
 
 .card-content {
@@ -395,4 +406,19 @@ body {
   .card {
     min-width: 100%;
   }
+}
+
+.map-config-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 320px;
+  padding: 24px;
+  text-align: center;
+  color: #8b2e2e;
+  background-color: #f8e8e8;
+  border: 1px solid rgba(139, 46, 46, 0.2);
+  border-radius: 8px;
+  line-height: 1.7;
 }

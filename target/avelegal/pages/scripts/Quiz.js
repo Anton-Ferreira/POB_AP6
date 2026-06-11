@@ -1,18 +1,32 @@
+const avesQuiz = window.AVES_QUIZ || [];
+
 const perguntas = [
   {
     texto: "Quanto tempo livre você possui diariamente?",
     opcoes: [
       {
         label: "Muito tempo (4h+)",
-        pontos: { calopsita: 3, papagaio: 3, periquito: 1 },
+        ajustes: {
+          dificuldade: { medio: 2, dificil: 3 },
+          ruido: { medio: 1, alto: 2 },
+          porte: { medio: 2 },
+        },
       },
       {
         label: "Tempo moderado (1–3h)",
-        pontos: { calopsita: 2, papagaio: 1, periquito: 2 },
+        ajustes: {
+          dificuldade: { facil: 1, medio: 3 },
+          ruido: { medio: 2 },
+          porte: { pequeno: 1, medio: 2 },
+        },
       },
       {
         label: "Pouco tempo (menos de 1h)",
-        pontos: { calopsita: 0, papagaio: 0, periquito: 3 },
+        ajustes: {
+          dificuldade: { facil: 3 },
+          ruido: { baixo: 2 },
+          porte: { pequeno: 3 },
+        },
       },
     ],
   },
@@ -21,15 +35,26 @@ const perguntas = [
     opcoes: [
       {
         label: "Nenhuma experiência",
-        pontos: { calopsita: 2, papagaio: 0, periquito: 3 },
+        ajustes: {
+          dificuldade: { facil: 4 },
+          porte: { pequeno: 2 },
+          ruido: { baixo: 1 },
+        },
       },
       {
         label: "Alguma experiência",
-        pontos: { calopsita: 3, papagaio: 1, periquito: 2 },
+        ajustes: {
+          dificuldade: { facil: 2, medio: 3 },
+          porte: { pequeno: 1, medio: 2 },
+        },
       },
       {
         label: "Experiente com aves",
-        pontos: { calopsita: 1, papagaio: 3, periquito: 1 },
+        ajustes: {
+          dificuldade: { medio: 2, dificil: 4 },
+          ruido: { alto: 2, medio: 1 },
+          porte: { medio: 3 },
+        },
       },
     ],
   },
@@ -38,15 +63,26 @@ const perguntas = [
     opcoes: [
       {
         label: "Apartamento pequeno",
-        pontos: { calopsita: 2, papagaio: 1, periquito: 3 },
+        ajustes: {
+          porte: { pequeno: 4 },
+          ruido: { baixo: 2, medio: 1 },
+          dificuldade: { facil: 2 },
+        },
       },
       {
         label: "Apartamento espaçoso",
-        pontos: { calopsita: 3, papagaio: 2, periquito: 2 },
+        ajustes: {
+          porte: { pequeno: 2, medio: 3 },
+          dificuldade: { facil: 1, medio: 2 },
+        },
       },
       {
         label: "Casa com área externa",
-        pontos: { calopsita: 2, papagaio: 3, periquito: 1 },
+        ajustes: {
+          porte: { medio: 4 },
+          dificuldade: { medio: 2, dificil: 2 },
+          ruido: { alto: 1, medio: 2 },
+        },
       },
     ],
   },
@@ -55,15 +91,25 @@ const perguntas = [
     opcoes: [
       {
         label: "Sim, adoro conversas!",
-        pontos: { calopsita: 1, papagaio: 3, periquito: 0 },
+        ajustes: {
+          ruido: { alto: 4, medio: 2 },
+          dificuldade: { medio: 2, dificil: 2 },
+        },
       },
       {
         label: "Um pouco está ótimo",
-        pontos: { calopsita: 3, papagaio: 1, periquito: 2 },
+        ajustes: {
+          ruido: { medio: 4, alto: 1 },
+          dificuldade: { facil: 1, medio: 2 },
+        },
       },
       {
         label: "Prefiro algo mais silencioso",
-        pontos: { calopsita: 1, papagaio: 0, periquito: 3 },
+        ajustes: {
+          ruido: { baixo: 4 },
+          porte: { pequeno: 2 },
+          dificuldade: { facil: 2 },
+        },
       },
     ],
   },
@@ -72,40 +118,66 @@ const perguntas = [
     opcoes: [
       {
         label: "Econômico (até R$100)",
-        pontos: { calopsita: 1, papagaio: 0, periquito: 3 },
+        ajustes: {
+          porte: { pequeno: 3 },
+          dificuldade: { facil: 3 },
+          ruido: { baixo: 1 },
+        },
       },
       {
         label: "Moderado (R$100–250)",
-        pontos: { calopsita: 3, papagaio: 1, periquito: 2 },
+        ajustes: {
+          porte: { pequeno: 2, medio: 2 },
+          dificuldade: { facil: 1, medio: 3 },
+        },
       },
       {
         label: "Sem restrições",
-        pontos: { calopsita: 1, papagaio: 3, periquito: 1 },
+        ajustes: {
+          porte: { medio: 3 },
+          dificuldade: { medio: 2, dificil: 3 },
+          ruido: { alto: 1, medio: 2 },
+        },
       },
     ],
   },
 ];
 
-const resultados = {
-  calopsita: {
-    icon: "🦜",
-    titulo: "Calopsita",
-    desc: "Carinhosa, sociável e de fácil manejo — a calopsita é perfeita para quem quer um companheiro afetivo sem precisar de muita experiência prévia. Ela adora atenção e aprende truques com facilidade.",
-  },
-  papagaio: {
-    icon: "🦚",
-    titulo: "Papagaio",
-    desc: "Inteligente, vocal e cheio de personalidade! O papagaio exige dedicação, espaço e experiência, mas recompensa com anos de companhia única e conversas surpreendentes.",
-  },
-  periquito: {
-    icon: "🐦",
-    titulo: "Periquito Australiano",
-    desc: "Alegre, resistente e adaptável — o periquito é ideal para rotinas mais corridas e espaços menores. Perfeito para iniciantes que querem começar a experiência com aves.",
-  },
-};
-
 let etapa = 0;
-let pontuacao = { calopsita: 0, papagaio: 0, periquito: 0 };
+let preferencias = criarPreferencias();
+
+function criarPreferencias() {
+  return {
+    dificuldade: { facil: 0, medio: 0, dificil: 0 },
+    ruido: { baixo: 0, medio: 0, alto: 0 },
+    porte: { pequeno: 0, medio: 0 },
+  };
+}
+
+function aplicarAjustes(ajustes) {
+  for (const eixo in ajustes) {
+    for (const chave in ajustes[eixo]) {
+      preferencias[eixo][chave] += ajustes[eixo][chave];
+    }
+  }
+}
+
+function pontuarAve(ave) {
+  let score = 0;
+
+  score += preferencias.dificuldade[ave.dificuldade] || 0;
+  score += preferencias.ruido[ave.ruido] || 0;
+  score += preferencias.porte[ave.porte] || 0;
+
+  return score;
+}
+
+function obterIconePorte(porte) {
+  if (porte === "pequeno") {
+    return "🐦";
+  }
+  return "🦜";
+}
 
 function renderPergunta() {
   const total = perguntas.length;
@@ -118,7 +190,7 @@ function renderPergunta() {
 
   const qEl = document.getElementById("quizQuestion");
   qEl.classList.remove("slide-in");
-  void qEl.offsetWidth; // reflow para reiniciar a animação
+  void qEl.offsetWidth;
   qEl.textContent = q.texto;
   qEl.classList.add("slide-in");
 
@@ -131,19 +203,32 @@ function renderPergunta() {
   q.opcoes.forEach((op) => {
     const btn = document.createElement("button");
     btn.textContent = op.label;
-    btn.onclick = () => escolher(op.pontos);
+    btn.onclick = () => escolher(op.ajustes);
     optsEl.appendChild(btn);
   });
 }
 
-function escolher(pontos) {
-  for (const ave in pontos) pontuacao[ave] += pontos[ave];
+function escolher(ajustes) {
+  aplicarAjustes(ajustes);
   etapa++;
+
   if (etapa < perguntas.length) {
     renderPergunta();
   } else {
     mostrarResultado();
   }
+}
+
+function encontrarMelhorAve() {
+  if (!avesQuiz.length) {
+    return null;
+  }
+
+  const ranking = avesQuiz
+    .map((ave) => ({ ave, score: pontuarAve(ave) }))
+    .sort((a, b) => b.score - a.score);
+
+  return ranking[0].score > 0 ? ranking[0].ave : avesQuiz[0];
 }
 
 function mostrarResultado() {
@@ -152,12 +237,31 @@ function mostrarResultado() {
   document.getElementById("quizQuestion").style.display = "none";
   document.getElementById("quizOptions").style.display = "none";
 
-  const vencedor = Object.entries(pontuacao).sort((a, b) => b[1] - a[1])[0][0];
-  const r = resultados[vencedor];
+  const vencedora = encontrarMelhorAve();
+  const iconEl = document.getElementById("resultIcon");
+  const imageWrap = document.getElementById("resultImageWrap");
+  const imageEl = document.getElementById("resultImage");
+  const titleEl = document.getElementById("resultTitle");
+  const descEl = document.getElementById("resultDesc");
+  const linkEl = document.getElementById("resultLink");
 
-  document.getElementById("resultIcon").textContent = r.icon;
-  document.getElementById("resultTitle").textContent = r.titulo;
-  document.getElementById("resultDesc").textContent = r.desc;
+  if (!vencedora) {
+    iconEl.textContent = "🕊️";
+    imageWrap.style.display = "none";
+    titleEl.textContent = "Nenhuma espécie disponível";
+    descEl.textContent =
+      "Não foi possível carregar as espécies do banco de dados para recomendar uma ave.";
+    linkEl.style.display = "none";
+  } else {
+    iconEl.textContent = obterIconePorte(vencedora.porte);
+    imageEl.src = vencedora.imagem;
+    imageEl.alt = vencedora.nome;
+    imageWrap.style.display = "block";
+    titleEl.textContent = vencedora.nome;
+    descEl.textContent = vencedora.resumo;
+    linkEl.href = vencedora.url;
+    linkEl.style.display = "inline-block";
+  }
 
   const res = document.getElementById("quizResult");
   res.style.display = "block";
@@ -166,10 +270,12 @@ function mostrarResultado() {
 
 function restartQuiz() {
   etapa = 0;
-  pontuacao = { calopsita: 0, papagaio: 0, periquito: 0 };
+  preferencias = criarPreferencias();
   document.getElementById("quizResult").style.display = "none";
   document.getElementById("quizQuestion").style.display = "block";
   document.getElementById("quizOptions").style.display = "flex";
+  document.getElementById("resultLink").style.display = "none";
+  document.getElementById("resultImageWrap").style.display = "none";
   renderPergunta();
 }
 

@@ -1,4 +1,6 @@
 controllers\AppServlet.class
-utils\ConnectionDB.class
 models\dao\AveDAO.class
 models\Ave.class
+utils\SupabaseClient.class
+utils\GoogleMapsConfig.class
+models\AveQuizPerfil.class

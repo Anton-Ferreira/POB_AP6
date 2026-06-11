@@ -38,7 +38,17 @@ let userMarker = null;
 
 let userCoords = null;
 
+let centroReferencia = null;
+
+let ultimoCentroBusca = null;
+
 let mostrandoTodos = false;
+
+let recarregandoLocais = false;
+
+let debounceRecarga = null;
+
+const DISTANCIA_MINIMA_RECARGA_KM = 0.4;
 
 // =====================================================================
 // HAVERSINE
@@ -60,6 +70,47 @@ function haversine(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.asin(Math.sqrt(a));
 }
 
+function obterCentroBusca(location = null) {
+  if (location) {
+    return location;
+  }
+
+  const center = mapaGoogle.getCenter();
+
+  return {
+    lat: center.lat(),
+    lng: center.lng(),
+  };
+}
+
+function centroMudouSignificativamente(centro) {
+  if (!ultimoCentroBusca) {
+    return true;
+  }
+
+  return (
+    haversine(
+      ultimoCentroBusca.lat,
+      ultimoCentroBusca.lng,
+      centro.lat,
+      centro.lng,
+    ) >= DISTANCIA_MINIMA_RECARGA_KM
+  );
+}
+
+function definirCentroReferencia(centro) {
+  centroReferencia = centro;
+  ultimoCentroBusca = centro;
+}
+
+function indicarCarregamentoLocais(carregando) {
+  const countLabel = document.getElementById("count-label");
+
+  if (carregando) {
+    countLabel.textContent = "(...)";
+  }
+}
+
 function formatarDistancia(km) {
   if (km < 1) {
     return `${Math.round(km * 1000)} m`;
@@ -68,100 +119,137 @@ function formatarDistancia(km) {
   return `${km.toFixed(1)} km`;
 }
 
+function obterImagemDePhotos(photos) {
+  if (!photos || photos.length === 0) {
+    return null;
+  }
+
+  try {
+    return photos[0].getUrl({ maxWidth: 400, maxHeight: 400 });
+  } catch {
+    return null;
+  }
+}
+
+function buscarImagemPlace(place) {
+  const imagemDireta = obterImagemDePhotos(place.photos);
+  if (imagemDireta) {
+    return Promise.resolve(imagemDireta);
+  }
+
+  if (!place.place_id) {
+    return Promise.resolve(null);
+  }
+
+  return new Promise((resolve) => {
+    const service = new google.maps.places.PlacesService(mapaGoogle);
+
+    service.getDetails(
+      { placeId: place.place_id, fields: ["photos"] },
+      (detalhe, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK) {
+          resolve(null);
+          return;
+        }
+
+        resolve(obterImagemDePhotos(detalhe.photos));
+      },
+    );
+  });
+}
+
+async function montarLocal(place, index, categoria) {
+  const imagem = await buscarImagemPlace(place);
+
+  return {
+    id: place.place_id || `${Date.now()}-${index}`,
+    placeId: place.place_id || null,
+    lat: place.geometry.location.lat(),
+    lng: place.geometry.location.lng(),
+    titulo: place.name,
+    endereco: place.vicinity || place.formatted_address || "Endereço não informado",
+    avaliacao: place.rating || 0,
+    categoria,
+    tagLabel:
+      categoria === "petshop"
+        ? "Pet Shop Especializado"
+        : categoria === "criadouro"
+          ? "Criadouro"
+          : categoria === "veterinario"
+            ? "Veterinário"
+            : "Parque",
+    tagClass: categoria === "petshop" ? "brown" : "",
+    imagem,
+  };
+}
+
 // =====================================================================
 // BUSCA GOOGLE PLACES
 // =====================================================================
 
 async function buscarLocaisGoogle(keyword, categoria, location = null) {
-  return new Promise((resolve, reject) => {
+  const results = await new Promise((resolve) => {
     const service = new google.maps.places.PlacesService(mapaGoogle);
 
     service.nearbySearch(
       {
         location: location || mapaGoogle.getCenter(),
-
         radius: 15000,
-
         keyword,
       },
-
-      (results, status) => {
-        if (status !== google.maps.places.PlacesServiceStatus.OK) {
-          reject(status);
-
+      (places, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK || !places) {
+          resolve([]);
           return;
         }
 
-        const locais = results.map((place, index) => ({
-          id: Date.now() + index,
-
-          lat: place.geometry.location.lat(),
-
-          lng: place.geometry.location.lng(),
-
-          titulo: place.name,
-
-          endereco: place.vicinity || "Endereço não informado",
-
-          avaliacao: place.rating || 0,
-
-          categoria,
-
-          tagLabel:
-            categoria === "petshop"
-              ? "Pet Shop Especializado"
-              : categoria === "criadouro"
-                ? "Criadouro"
-                : "Parque",
-
-          tagClass: categoria === "petshop" ? "brown" : "",
-
-          imagem:
-            categoria === "petshop"
-              ? "https://images.unsplash.com/photo-1544923408-75c5cef46f14?q=80&w=400"
-              : categoria === "criadouro"
-                ? "https://images.unsplash.com/photo-1522926193341-e9ffd686c60f?q=80&w=400"
-                : "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=400",
-        }));
-
-        resolve(locais);
+        resolve(places);
       },
     );
   });
+
+  return Promise.all(
+    results.map((place, index) => montarLocal(place, index, categoria)),
+  );
 }
 
 // =====================================================================
 // CARREGA LOCAIS AUTOMÁTICOS
 // =====================================================================
 
-async function carregarLocaisAutomaticos(location = null) {
-  const petshops = await buscarLocaisGoogle(
-    "pet shop aves",
-    "petshop",
-    location,
-  );
+async function carregarLocaisAutomaticos(location = null, forcar = false) {
+  if (!mapaGoogle || recarregandoLocais) {
+    return;
+  }
 
-  const criadouros = await buscarLocaisGoogle(
-    "criadouro de aves",
-    "criadouro",
-    location,
-  );
+  const centro = obterCentroBusca(location);
 
-  const parques = await buscarLocaisGoogle("parque", "parque", location);
+  if (!forcar && !centroMudouSignificativamente(centro)) {
+    return;
+  }
 
-  const veterinarios = await buscarLocaisGoogle(
-    "veterinário aves",
-    "veterinario",
-    location,
-  );
+  recarregandoLocais = true;
+  indicarCarregamentoLocais(true);
 
-  bancoDeDados = [...petshops, ...criadouros, ...parques, ...veterinarios];
+  try {
+    const [petshops, criadouros, parques, veterinarios] = await Promise.all([
+      buscarLocaisGoogle("pet shop aves", "petshop", centro),
+      buscarLocaisGoogle("criadouro de aves", "criadouro", centro),
+      buscarLocaisGoogle("parque", "parque", centro),
+      buscarLocaisGoogle("veterinário aves", "veterinario", centro),
+    ]);
 
-  limparMarcadores();
+    bancoDeDados = [...petshops, ...criadouros, ...parques, ...veterinarios];
+    definirCentroReferencia(centro);
 
-  criarMarcadores();
+    limparMarcadores();
 
-  aplicarFiltros();
+    criarMarcadores();
+
+    aplicarFiltros();
+  } finally {
+    recarregandoLocais = false;
+  }
 }
 
 // =====================================================================
@@ -272,11 +360,21 @@ function gerarCards(locaisFiltrados) {
   }
 
   const ordenados = [...locaisFiltrados].sort((a, b) => {
-    if (!userCoords) return 0;
+    if (!centroReferencia) return 0;
 
-    const da = haversine(userCoords.lat, userCoords.lng, a.lat, a.lng);
+    const da = haversine(
+      centroReferencia.lat,
+      centroReferencia.lng,
+      a.lat,
+      a.lng,
+    );
 
-    const db = haversine(userCoords.lat, userCoords.lng, b.lat, b.lng);
+    const db = haversine(
+      centroReferencia.lat,
+      centroReferencia.lng,
+      b.lat,
+      b.lng,
+    );
 
     return da - db;
   });
@@ -294,20 +392,24 @@ function gerarCards(locaisFiltrados) {
     : `Ver todos (${ordenados.length})`;
 
   locaisParaExibir.forEach((local) => {
-    const distKm = userCoords
-      ? haversine(userCoords.lat, userCoords.lng, local.lat, local.lng)
+    const distKm = centroReferencia
+      ? haversine(centroReferencia.lat, centroReferencia.lng, local.lat, local.lng)
       : null;
 
     const distLabel = distKm !== null ? formatarDistancia(distKm) : "—";
 
     const card = document.createElement("div");
 
-    card.className = "card";
+    card.className = local.imagem ? "card" : "card card-sem-imagem";
 
     card.dataset.id = local.id;
 
+    const imagemHtml = local.imagem
+      ? `<img src="${local.imagem}" alt="${local.titulo}" />`
+      : "";
+
     card.innerHTML = `
-        <img src="${local.imagem}" alt="${local.titulo}" />
+        ${imagemHtml}
 
         <div class="card-content">
 
@@ -404,7 +506,7 @@ function destacarCard(id) {
   document.querySelectorAll(".card").forEach((card) => {
     card.classList.remove("active");
 
-    if (parseInt(card.dataset.id) === id) {
+    if (parseInt(card.dataset.id) === id || card.dataset.id === String(id)) {
       card.classList.add("active");
 
       card.scrollIntoView({
@@ -419,39 +521,167 @@ function destacarCard(id) {
 }
 
 // =====================================================================
+// GEOLOCALIZAÇÃO
+// =====================================================================
+
+async function obterEstadoPermissaoGeolocalizacao() {
+  if (!navigator.geolocation) {
+    return "unsupported";
+  }
+
+  if (!navigator.permissions?.query) {
+    return "unknown";
+  }
+
+  try {
+    const result = await navigator.permissions.query({ name: "geolocation" });
+    return result.state;
+  } catch {
+    return "unknown";
+  }
+}
+
+function obterPosicaoUsuario() {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: false,
+      maximumAge: 300000,
+      timeout: 10000,
+    });
+  });
+}
+
+async function aplicarLocalizacaoUsuario(exibirErro = true) {
+  if (!navigator.geolocation) {
+    if (exibirErro) {
+      alert("Geolocalização não suportada.");
+    }
+
+    return false;
+  }
+
+  try {
+    const position = await obterPosicaoUsuario();
+
+    userCoords = {
+      lat: position.coords.latitude,
+      lng: position.coords.longitude,
+    };
+
+    mapaGoogle.panTo(userCoords);
+    mapaGoogle.setZoom(14);
+
+    await carregarLocaisAutomaticos(userCoords, true);
+    criarMarcadorUsuario(userCoords);
+
+    return true;
+  } catch {
+    if (exibirErro) {
+      alert("Não foi possível obter sua localização.");
+    }
+
+    return false;
+  }
+}
+
+async function centralizarSePermissaoConcedida() {
+  const permissao = await obterEstadoPermissaoGeolocalizacao();
+
+  if (permissao !== "granted") {
+    return null;
+  }
+
+  try {
+    const position = await obterPosicaoUsuario();
+
+    return {
+      lat: position.coords.latitude,
+      lng: position.coords.longitude,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function criarMarcadorUsuario(coords) {
+  if (userMarker) {
+    userMarker.map = null;
+  }
+
+  userMarker = new google.maps.Marker({
+    position: coords,
+    map: mapaGoogle,
+    title: "Sua localização",
+  });
+}
+
+function configurarInteracaoMapa() {
+  mapaGoogle.addListener("idle", () => {
+    clearTimeout(debounceRecarga);
+
+    debounceRecarga = setTimeout(() => {
+      carregarLocaisAutomaticos();
+    }, 700);
+  });
+
+  mapaGoogle.addListener("click", (event) => {
+    const coords = {
+      lat: event.latLng.lat(),
+      lng: event.latLng.lng(),
+    };
+
+    clearTimeout(debounceRecarga);
+    carregarLocaisAutomaticos(coords, true);
+  });
+}
+
+// =====================================================================
 // MAPA
 // =====================================================================
 
 window.initMap = async function () {
   const loading = document.getElementById("map-loading");
 
-  const { Map } = await google.maps.importLibrary("maps");
+  try {
+    const { Map } = await google.maps.importLibrary("maps");
 
-  await google.maps.importLibrary("marker");
+    await google.maps.importLibrary("marker");
 
-  mapaGoogle = new Map(document.getElementById("map"), {
-    center: {
-      lat: -23.56,
+    const coordsUsuario = await centralizarSePermissaoConcedida();
 
-      lng: -46.645,
-    },
+    if (coordsUsuario) {
+      userCoords = coordsUsuario;
+    }
 
-    zoom: 12,
+    mapaGoogle = new Map(document.getElementById("map"), {
+      center: coordsUsuario || {
+        lat: -23.56,
+        lng: -46.645,
+      },
+      zoom: coordsUsuario ? 14 : 12,
+      mapId: "DEMO_MAP_ID",
+      mapTypeControl: false,
+      streetViewControl: false,
+    });
 
-    mapId: "DEMO_MAP_ID",
+    configurarInteracaoMapa();
 
-    mapTypeControl: false,
+    if (coordsUsuario) {
+      await carregarLocaisAutomaticos(coordsUsuario, true);
+      criarMarcadorUsuario(coordsUsuario);
+    } else {
+      await carregarLocaisAutomaticos(null, true);
+    }
+  } catch (error) {
+    console.error("Erro ao carregar o mapa:", error);
+    gerarCards([]);
+  } finally {
+    loading.classList.add("hidden");
 
-    streetViewControl: false,
-  });
-
-  await carregarLocaisAutomaticos();
-
-  loading.classList.add("hidden");
-
-  setTimeout(() => {
-    loading.remove();
-  }, 500);
+    setTimeout(() => {
+      loading.remove();
+    }, 500);
+  }
 };
 
 // =====================================================================
@@ -477,43 +707,7 @@ document.getElementById("ver-todos").addEventListener("click", (e) => {
 // =====================================================================
 
 document.getElementById("btn-location").addEventListener("click", () => {
-  if (!navigator.geolocation) {
-    alert("Geolocalização não suportada.");
-
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    async (position) => {
-      userCoords = {
-        lat: position.coords.latitude,
-
-        lng: position.coords.longitude,
-      };
-
-      mapaGoogle.panTo(userCoords);
-
-      mapaGoogle.setZoom(14);
-
-      await carregarLocaisAutomaticos(userCoords);
-
-      if (userMarker) {
-        userMarker.map = null;
-      }
-
-      userMarker = new google.maps.Marker({
-        position: userCoords,
-
-        map: mapaGoogle,
-
-        title: "Sua localização",
-      });
-    },
-
-    () => {
-      alert("Não foi possível obter sua localização.");
-    },
-  );
+  aplicarLocalizacaoUsuario(true);
 });
 
 // =====================================================================
@@ -547,42 +741,35 @@ document
           return;
         }
 
-        bancoDeDados = results.map((place, index) => ({
-          id: Date.now() + index,
+        Promise.all(
+          results.map(async (place, index) => ({
+            ...(await montarLocal(place, index, "petshop")),
+            tagLabel: "Resultado da Busca",
+            tagClass: "brown",
+          })),
+        ).then((locais) => {
+          bancoDeDados = locais;
 
-          lat: place.geometry.location.lat(),
+          if (bancoDeDados.length > 0) {
+            definirCentroReferencia({
+              lat: bancoDeDados[0].lat,
+              lng: bancoDeDados[0].lng,
+            });
+          }
 
-          lng: place.geometry.location.lng(),
+          limparMarcadores();
 
-          titulo: place.name,
+          criarMarcadores();
 
-          endereco: place.formatted_address || "Endereço não informado",
+          gerarCards(bancoDeDados);
 
-          avaliacao: place.rating || 0,
-
-          categoria: "petshop",
-
-          tagLabel: "Resultado da Busca",
-
-          tagClass: "brown",
-
-          imagem:
-            "https://images.unsplash.com/photo-1544923408-75c5cef46f14?q=80&w=400",
-        }));
-
-        limparMarcadores();
-
-        criarMarcadores();
-
-        gerarCards(bancoDeDados);
-
-        if (bancoDeDados.length > 0) {
-          mapaGoogle.panTo({
-            lat: bancoDeDados[0].lat,
-
-            lng: bancoDeDados[0].lng,
-          });
-        }
+          if (bancoDeDados.length > 0) {
+            mapaGoogle.panTo({
+              lat: bancoDeDados[0].lat,
+              lng: bancoDeDados[0].lng,
+            });
+          }
+        });
       },
     );
   });
